@@ -36,7 +36,7 @@
   .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
   input[type="search"],select{padding:8px 10px;border-radius:10px;border:1px solid #e6edf7}
   .btn{background:var(--brand);border:none;color:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
-  .btn.ghost{background:transparent;color:var(--ink);border:1px solid #e6edf7}
+  .btn.ghost{background:transparent;color:#0f172a;border:1px solid #e6edf7}
   .small{font-size:.86rem;color:var(--muted)}
   .list{display:flex;flex-direction:column;gap:8px}
   .item{display:flex;justify-content:space-between;align-items:center;border:1px solid #eef2f7;border-radius:10px;padding:8px}
@@ -82,16 +82,15 @@ const MACHINES = {
 };
 
 // FOLDERS: Drive folderId za svaku kombinaciju
-// npr. FOLDERS['Bakery 1']['Mixing'].documentation = 'FOLDER_ID'
 const FOLDERS = {
   'Bakery 1': {
     'Fritsch': {
-      documentation: '', // kasnije dodaj Folder ID
-      works: '',         // kasnije dodaj Folder ID
-      electrical: '',    // kasnije dodaj Folder ID
-      procedures: '1ismVYGrYFzwSbzxcoY_xki_KLhkdPpz0' // tvoj primjer ID
+      documentation: '', // dodaj Folder ID
+      works: '',         // dodaj Folder ID
+      electrical: '',    // dodaj Folder ID
+      procedures: '1ismVYGrYFzwSbzxcoY_xki_KLhkdPpz0' // tvoj ID
     }
-    // ... ovdje možeš dodati i ostale strojeve za Bakery 1
+    // ... dodaj ostale strojeve za Bakery 1
   },
 
   'Bakery 2': {
@@ -99,11 +98,10 @@ const FOLDERS = {
   },
 
   'Bakery 3': {
-    // ako želiš da odmah otvara 4 kvadrata bez strojeva:
+    // ako želiš odmah 4 kvadrata bez strojeva:
     // '—': { documentation:'...', works:'...', electrical:'...', procedures:'...' }
   }
 };
- 
 
 const CATS = {
   documentation: { title:'Documentation', color:'c1', desc:'User manuals & technical docs' },
@@ -190,16 +188,38 @@ function drawCategory(b,m,catKey){
   const file=document.createElement('input'); file.type='file'; file.accept='application/pdf,image/*';
   const up=document.createElement('button'); up.className='btn'; up.textContent='Upload';
   const refresh=document.createElement('button'); refresh.className='btn ghost'; refresh.textContent='Refresh';
-  bar.append(search,file,up,refresh); card.appendChild(bar);
+
+  // NEW: public open + admin sign-in
+  const openPublic = document.createElement('a');
+  openPublic.className = 'btn';
+  openPublic.textContent = 'Open folder (no login)';
+  openPublic.href = fid ? `https://drive.google.com/drive/folders/${fid}` : '#';
+  openPublic.target = '_blank';
+  openPublic.rel = 'noopener';
+
+  const adminBtn = document.createElement('button');
+  adminBtn.className = 'btn ghost';
+  adminBtn.textContent = 'Admin: Sign in to manage';
+
+  bar.prepend(openPublic, adminBtn);
+  bar.append(search,file,up,refresh); 
+  card.appendChild(bar);
 
   const list=document.createElement('div'); list.className='list'; card.appendChild(list);
   view.appendChild(card);
+
+  // hide API-based controls until admin signs in
+  file.style.display = 'none';
+  up.style.display = 'none';
+  refresh.style.display = 'none';
+  list.style.display = 'none';
+  search.style.display = 'none';
 
   async function listFiles(){
     list.innerHTML='<div class="small">Loading…</div>';
     try{
       if(!fid){ list.innerHTML='<div class="small">Postavi Drive folder ID da vidiš datoteke ovdje.</div>'; return; }
-      await ensureAuth();
+      // no ensureAuth() here — sign-in happens on admin button
       const q = `('${fid}' in parents) and trashed=false`;
       const res = await gapi.client.drive.files.list({ q, fields:'files(id,name,modifiedTime,mimeType,webViewLink)', orderBy:'modifiedTime desc', pageSize:100 });
       let items=res.result.files||[]; const s=(search.value||'').toLowerCase(); if(s) items=items.filter(f=>(f.name||'').toLowerCase().includes(s));
@@ -207,12 +227,12 @@ function drawCategory(b,m,catKey){
       list.innerHTML='';
       items.forEach(f=>{
         const row=document.createElement('div'); row.className='item';
-        const when=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
+        const when=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():''; 
         row.innerHTML=`<div><strong>${escapeHtml(f.name)}</strong><div class='small'>${escapeHtml(f.mimeType)} • ${escapeHtml(when)}</div></div>`;
         const actions=document.createElement('div'); actions.style.display='flex'; actions.style.gap='8px';
         const v=document.createElement('a'); v.className='btn ghost'; v.textContent='View'; v.href=f.webViewLink||`https://drive.google.com/file/d/${f.id}/view`; v.target='_blank'; v.rel='noopener';
         const dl=document.createElement('a'); dl.className='btn'; dl.textContent='Download'; dl.href=`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`; dl.target='_blank'; dl.rel='noopener';
-        const del=document.createElement('button'); del.className='btn ghost'; del.textContent='Delete'; del.onclick=async()=>{ if(!confirm('Delete file?')) return; try{ await ensureAuth(); await gapi.client.drive.files.delete({fileId:f.id}); listFiles(); }catch(e){ alert('Delete failed: '+(e.result?.error?.message||e.message)); } };
+        const del=document.createElement('button'); del.className='btn ghost'; del.textContent='Delete'; del.onclick=async()=>{ if(!confirm('Delete file?')) return; try{ await gapi.client.drive.files.delete({fileId:f.id}); listFiles(); }catch(e){ alert('Delete failed: '+(e.result?.error?.message||e.message)); } };
         actions.append(v,dl,del); row.appendChild(actions); list.appendChild(row);
       });
     }catch(e){ console.error(e); list.innerHTML=`<div class='small'>Error: ${escapeHtml(e.message||String(e))}</div>`; }
@@ -220,17 +240,40 @@ function drawCategory(b,m,catKey){
 
   refresh.onclick=listFiles;
   search.oninput=listFiles;
+
+  // sign-in only when admin wants to manage
+  adminBtn.onclick = async () => {
+    try{
+      await ensureAuth();              // this triggers Google login once
+      // show management UI
+      file.style.display = '';
+      up.style.display = '';
+      refresh.style.display = '';
+      list.style.display = '';
+      search.style.display = '';
+      adminBtn.style.display = 'none';
+      await listFiles();
+    }catch(e){
+      alert('Sign-in failed: ' + (e.message || String(e)));
+    }
+  };
+
+  // Upload with auto-public permission
   up.onclick=async()=>{
     try{
       if(!fid){ alert('Postavi Drive folder ID u FOLDERS.'); return; }
       if(!file.files || !file.files[0]){ alert('Odaberi datoteku'); return; }
       await ensureAuth(); up.disabled=true; up.textContent='Uploading…';
-      await uploadToDrive(fid, file.files[0]); file.value=''; await listFiles();
+      const newId = await uploadToDrive(fid, file.files[0]);
+      // Make uploaded file publicly readable
+      await gapi.client.drive.permissions.create({
+        fileId: newId,
+        resource: { type: 'anyone', role: 'reader' }
+      });
+      file.value=''; await listFiles();
     }catch(e){ alert('Upload failed: '+(e.message||String(e))); }
     finally{ up.disabled=false; up.textContent='Upload'; }
   };
-
-  listFiles();
 }
 
 async function uploadToDrive(folderId, file){
@@ -241,8 +284,10 @@ async function uploadToDrive(folderId, file){
   const ab=await file.arrayBuffer(); const b64=btoa(String.fromCharCode(...new Uint8Array(ab)));
   const body=delimiter+'Content-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+
              delimiter+'Content-Type: '+(file.type||'application/octet-stream')+'\r\nContent-Transfer-Encoding: base64\r\n\r\n'+b64+closeDelim;
-  const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'multipart/related; boundary='+boundary},body});
+  const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'multipart/related; boundary='+boundary},body});
   if(!r.ok){ const j=await r.json().catch(()=>({})); throw new Error(j.error?.message||'Upload failed'); }
+  const created = await r.json();
+  return created.id; // return file id so we can set permission
 }
 
 function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c])); }
