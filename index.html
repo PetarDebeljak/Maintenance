@@ -71,8 +71,8 @@
 2) Popuni mapiranje FOLDERS za svaku kategoriju (po Bakery → Machine → Category)
    Category kljucevi: 'documentation', 'works', 'electrical', 'procedures'
 ******************************/
-const CLIENT_ID = 'YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com';
-const API_KEY   = 'YOUR_API_KEY';
+const CLIENT_ID = '937032004801-nfma3pp3fkkck4mfk094imqgmvduj7ih.apps.googleusercontent.com';
+const API_KEY   = 'AIzaSyDnEsld28xzG1lQROwBO_ImDq2SxX4kcg8';
 const SCOPES    = 'https://www.googleapis.com/auth/drive.file'; // ili '.../drive' za siru listu
 
 const MACHINES = {
@@ -83,7 +83,27 @@ const MACHINES = {
 
 // FOLDERS: Drive folderId za svaku kombinaciju
 // npr. FOLDERS['Bakery 1']['Mixing'].documentation = 'FOLDER_ID'
-const FOLDERS = {};
+const FOLDERS = {
+  'Bakery 1': {
+    'Fritsch': {
+      documentation: '', // kasnije dodaj Folder ID
+      works: '',         // kasnije dodaj Folder ID
+      electrical: '',    // kasnije dodaj Folder ID
+      procedures: '1ismVYGrYFzwSbzxcoY_xki_KLhkdPpz0' // tvoj primjer ID
+    }
+    // ... ovdje možeš dodati i ostale strojeve za Bakery 1
+  },
+
+  'Bakery 2': {
+    // strojevi i kategorije kada dodaš Folder ID-eve
+  },
+
+  'Bakery 3': {
+    // ako želiš da odmah otvara 4 kvadrata bez strojeva:
+    // '—': { documentation:'...', works:'...', electrical:'...', procedures:'...' }
+  }
+};
+ 
 
 const CATS = {
   documentation: { title:'Documentation', color:'c1', desc:'User manuals & technical docs' },
