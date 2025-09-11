@@ -46,6 +46,16 @@
 </head>
 <body>
   <header><div class="hwrap"><div class="title">Panelto Bakery</div></div></header>
+<div id="lockscreen" style="
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#f6f8fb;z-index:9999;">
+  <h2 style="margin-bottom:12px;font-family:Inter,sans-serif;color:#0f172a;">Enter Access Code</h2>
+  <input type="password" id="pinInput" placeholder="Code" style="padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-size:1rem;">
+  <button id="pinBtn" style="margin-top:12px;padding:10px 16px;border:none;border-radius:8px;background:#0b63d6;color:#fff;font-size:1rem;cursor:pointer;">Unlock</button>
+  <p id="pinMsg" style="color:#dc2626;margin-top:10px;display:none;">Wrong code</p>
+</div>
+
   <main>
     <nav class="crumbs" id="crumbs"></nav>
     <section id="view">
@@ -356,6 +366,32 @@ window.addEventListener('error', (e)=>{
   el.innerHTML=`<div class='small'>JavaScript error: ${escapeHtml(e.message||'unknown')}</div>`;
   document.getElementById('view')?.appendChild(el);
 });
+  // Simple PIN gate
+const PIN_CODE = "2906";
+const lock = document.getElementById("lockscreen");
+const pinInput = document.getElementById("pinInput");
+const pinBtn = document.getElementById("pinBtn");
+const pinMsg = document.getElementById("pinMsg");
+
+function checkPin(){
+  if(pinInput.value === PIN_CODE){
+    lock.style.display = "none"; // sakrij lockscreen
+    sessionStorage.setItem("unlocked","1"); // pamti dok je browser tab otvoren
+  } else {
+    pinMsg.style.display = "block";
+  }
+}
+
+pinBtn.addEventListener("click", checkPin);
+pinInput.addEventListener("keypress", e=>{
+  if(e.key === "Enter") checkPin();
+});
+
+// ako je već otključano u ovoj sesiji → odmah sakrij
+if(sessionStorage.getItem("unlocked") === "1"){
+  lock.style.display = "none";
+}
+
 </script>
 </body>
 </html>
