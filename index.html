@@ -5,48 +5,63 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Panelto Bakery</title>
 <style>
-  :root{--bg:#D7DADE;--ink:#e5e7eb;--muted:#9aa4b2;--card:#80ADC4;--brand:#2563eb}
+  :root{
+    --bg:#f7fafc;
+    --ink:#1e293b;
+    --muted:#64748b;
+    --card:#ffffff;
+    --brand:#2563eb;
+  }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;background:var(--bg);color:var(--ink)}
-  header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#536596,#4575E6);backdrop-filter:saturate(180%) blur(8px);border-bottom:1px solid #708491}
+  html,body{
+    height:100%;margin:0;
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;
+    background:var(--bg);color:var(--ink)
+  }
+  header{
+    position:sticky;top:0;z-index:10;
+    background:#fff;border-bottom:1px solid #e2e8f0;
+  }
   .hwrap{max-width:960px;margin:0 auto;padding:12px 14px;display:flex;align-items:center;gap:10px}
   .title{font-weight:800}
   main{max-width:960px;margin:0 auto;padding:12px}
 
-  /* L1 & L2: full-width stacked rectangles (mobile-first) */
   .stack{display:flex;flex-direction:column;gap:10px}
-  .tile{display:block;background:linear-gradient(135deg,#111827,#0f172a);border:1px solid #1f2937;border-radius:14px;box-shadow:0 10px 28px rgba(0,0,0,.35);padding:18px 16px;text-decoration:none;color:inherit}
+  .tile{display:block;background:linear-gradient(135deg,#fff,#f8fafc);
+    border:1px solid #e2e8f0;border-radius:14px;
+    box-shadow:0 4px 14px rgba(0,0,0,.08);
+    padding:18px 16px;text-decoration:none;color:inherit}
   .tile h2{margin:0 0 4px 0;font-size:1.1rem}
   .tile p{margin:0;color:var(--muted);font-size:.9rem}
   .tile:active{transform:translateY(1px)}
 
-  /* L3: categories grid 2x2 */
   .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .square{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center}
-  .c1{background:linear-gradient(135deg,#1f2937,#0f172a)}
-  .c2{background:linear-gradient(135deg,#1e293b,#0b1220)}
-  .c3{background:linear-gradient(135deg,#1b2a22,#0d1a14)}
-  .c4{background:linear-gradient(135deg,#261b3a,#140d1e)}
+  .c1{background:#fef3c7}
+  .c2{background:#dbeafe}
+  .c3{background:#d1fae5}
+  .c4{background:#f3e8ff}
 
-  .card{background:var(--card);border:1px solid #1f2937;border-radius:14px;box-shadow:0 10px 28px rgba(0,0,0,.35);padding:12px}
+  .card{background:var(--card);border:1px solid #e2e8f0;border-radius:14px;
+    box-shadow:0 4px 14px rgba(0,0,0,.08);padding:12px}
   .crumbs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
-  .crumbs a{color:#93c5fd;text-decoration:none}
-  .crumbs .sep{opacity:.45;color:#64748b}
+  .crumbs a{color:var(--brand);text-decoration:none}
+  .crumbs .sep{opacity:.45;color:var(--muted)}
 
   .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
-  input[type="search"],select{padding:8px 10px;border-radius:10px;border:1px solid #1f2937;background:#0b1220;color:var(--ink)}
+  input[type="search"],select{padding:8px 10px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:var(--ink)}
   .btn{background:var(--brand);border:none;color:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
-  .btn.ghost{background:transparent;color:var(--ink);border:1px solid #1f2937}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid #cbd5e1}
   .small{font-size:.86rem;color:var(--muted)}
   .list{display:flex;flex-direction:column;gap:8px}
 
-  /* NOVO: cijela kartica = View link; desno mala ikona za download/delete */
-  .item{display:flex;align-items:center;gap:12px;border:1px solid #1f2937;border-radius:12px;padding:12px;background:#0b1220}
+  .item{display:flex;align-items:center;gap:12px;border:1px solid #e2e8f0;
+    border-radius:12px;padding:12px;background:#fff}
   .item a.title{flex:1;text-decoration:none;color:inherit}
   .item a.title:hover{text-decoration:underline}
   .item .meta{font-size:.82rem;color:var(--muted);margin-top:4px}
-  .icon-btn{min-width:38px;min-height:38px;border-radius:999px;border:1px solid #1f2937;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
-  .icon-btn svg{width:18px;height:18px;display:block}
+  .icon-btn{min-width:34px;min-height:34px;border-radius:999px;border:1px solid #cbd5e1;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .icon-btn svg{width:16px;height:16px;display:block}
 
   footer{height:1px}
 </style>
@@ -55,11 +70,11 @@
   <header><div class="hwrap"><div class="title">Panelto Bakery</div></div></header>
 
   <!-- PIN lock -->
-  <div id="lockscreen" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0b1220;z-index:9999;">
-    <h2 style="margin-bottom:12px;font-family:Inter,sans-serif;color:#e5e7eb;">Enter Access Code</h2>
-    <input type="password" id="pinInput" placeholder="Code" style="padding:10px 14px;border:1px solid #1f2937;background:#0b1220;color:#e5e7eb;border-radius:8px;font-size:1rem;">
+  <div id="lockscreen" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f7fafc;z-index:9999;">
+    <h2 style="margin-bottom:12px;font-family:Inter,sans-serif;color:#1e293b;">Enter Access Code</h2>
+    <input type="password" id="pinInput" placeholder="Code" style="padding:10px 14px;border:1px solid #cbd5e1;background:#fff;color:#1e293b;border-radius:8px;font-size:1rem;">
     <button id="pinBtn" style="margin-top:12px;padding:10px 16px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-size:1rem;cursor:pointer;">Unlock</button>
-    <p id="pinMsg" style="color:#f87171;margin-top:10px;display:none;">Wrong code</p>
+    <p id="pinMsg" style="color:#dc2626;margin-top:10px;display:none;">Wrong code</p>
   </div>
 
   <main>
@@ -77,7 +92,6 @@
   <!-- Google Identity Services + Google API client -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
-
 <script>
 /******** QUICK SETUP ********/
 const CLIENT_ID = '937032004801-nfma3pp3fkkck4mfk094imqgmvduj7ih.apps.googleusercontent.com';
