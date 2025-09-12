@@ -26,15 +26,19 @@
   .title{font-weight:800}
   main{max-width:960px;margin:0 auto;padding:12px}
 
+  /* L1 & L2: full-width stacked rectangles */
   .stack{display:flex;flex-direction:column;gap:10px}
-  .tile{display:block;background:linear-gradient(135deg,#fff,#f8fafc);
+  .tile{
+    display:block;background:linear-gradient(135deg,#fff,#f8fafc);
     border:1px solid #e2e8f0;border-radius:14px;
     box-shadow:0 4px 14px rgba(0,0,0,.08);
-    padding:18px 16px;text-decoration:none;color:inherit}
+    padding:18px 16px;text-decoration:none;color:inherit
+  }
   .tile h2{margin:0 0 4px 0;font-size:1.1rem}
   .tile p{margin:0;color:var(--muted);font-size:.9rem}
   .tile:active{transform:translateY(1px)}
 
+  /* L3: categories grid 2x2 */
   .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .square{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center}
   .c1{background:#fef3c7}
@@ -42,25 +46,35 @@
   .c3{background:#d1fae5}
   .c4{background:#f3e8ff}
 
-  .card{background:var(--card);border:1px solid #e2e8f0;border-radius:14px;
-    box-shadow:0 4px 14px rgba(0,0,0,.08);padding:12px}
+  .card{
+    background:var(--card);border:1px solid #e2e8f0;border-radius:14px;
+    box-shadow:0 4px 14px rgba(0,0,0,.08);padding:12px
+  }
   .crumbs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
   .crumbs a{color:var(--brand);text-decoration:none}
   .crumbs .sep{opacity:.45;color:var(--muted)}
 
   .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
-  input[type="search"],select{padding:8px 10px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:var(--ink)}
+  input[type="search"],select{
+    padding:8px 10px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:var(--ink)
+  }
   .btn{background:var(--brand);border:none;color:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
   .btn.ghost{background:transparent;color:var(--ink);border:1px solid #cbd5e1}
   .small{font-size:.86rem;color:var(--muted)}
   .list{display:flex;flex-direction:column;gap:8px}
 
-  .item{display:flex;align-items:center;gap:12px;border:1px solid #e2e8f0;
-    border-radius:12px;padding:12px;background:#fff}
+  /* List rows: title link + small download/delete icons on the right */
+  .item{
+    display:flex;align-items:center;gap:12px;border:1px solid #e2e8f0;
+    border-radius:12px;padding:12px;background:#fff
+  }
   .item a.title{flex:1;text-decoration:none;color:inherit}
   .item a.title:hover{text-decoration:underline}
   .item .meta{font-size:.82rem;color:var(--muted);margin-top:4px}
-  .icon-btn{min-width:34px;min-height:34px;border-radius:999px;border:1px solid #cbd5e1;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .icon-btn{
+    min-width:34px;min-height:34px;border-radius:999px;border:1px solid #cbd5e1;
+    background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer
+  }
   .icon-btn svg{width:16px;height:16px;display:block}
 
   footer{height:1px}
@@ -92,36 +106,36 @@
   <!-- Google Identity Services + Google API client -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://apis.google.com/js/api.js" async defer></script>
+
 <script>
 /******** QUICK SETUP ********/
-const CLIENT_ID = '937032004801-nfma3pp3fkkck4mfk094imqgmvduj7ih.apps.googleusercontent.com';
-const API_KEY   = 'AIzaSyDnEsld28xzG1lQROwBO_ImDq2SxX4kcg8';
+const CLIENT_ID = 'YOUR_CLIENT_ID.apps.googleusercontent.com';
+const API_KEY   = 'YOUR_API_KEY';
 const SCOPES    = 'https://www.googleapis.com/auth/drive.file';
 
 const MACHINES = {
   'Bakery 1': ['Mixing','Fermentation','Fritsch','Proover','Oven','Cooler','Freezer'],
-  'Bakery 2': ['Mixing','Fermentation','Rademaker','Proover','Scarifier','Oven','Cooler','Freezer','Retarder','Pattyn Tilting Conveyers','MIBs','AHU','Spiro','Bagger'],
-  'Bakery 3': ['Site 1 Packing','Site 2 Packing','Paletiser','Retail']
+  'Bakery 2': ['Mixing','Fermentation','Rademaker','Proover','Scarifier','Oven','Cooler','Freezer'],
+  'Bakery 3': [] // (ako ostane prazno → odmah otvara 2x2 kategorije)
 };
 
-// === TVOJI FOLDERI (skraćeno: ostavio sam tvoje iz backupa) ===
+// === Mapiraj svoje Drive mape po Bakery → Machine → Category:
 const FOLDERS = {
   'Bakery 1': {
-    'Fritsch':     { documentation:'1uKMNjOdQltXZDMOrjs8nCDdQNdU0Dupw', works:'1M0NE6MtE0i-RNcckiFT8KCoMMwYdOdG_', electrical:'1RCWfvgcjDVCbutedlh3lyWjJ_kW5As9L', procedures:'1ismVYGrYFzwSbzxcoY_xki_KLhkdPpz0' },
-    'Mixing':      { documentation:'1YG_ASV5ZG_rcSMKfcpjfU42w52CISWOn', works:'1NSIQBwmVfrocWgnMNOifWPDEmGx4dsc1', electrical:'1MiaraFYz59FaoMY_P-83-x5nyiB5-oFM', procedures:'1LMez4eD_gbCg70NBXxo73YgjZHthzs6U' },
-    'Oven':        { documentation:'1t5dNT63qYVHzvH07UK4zqjs2c2jmdY0p', works:'1pu8f-rkqxH6x_q69X8xmCdEuCDambyjF', electrical:'1w1N5FbwoRPDYYkU3UvCINLece900dlMZ', procedures:'10sw8HYDASd0RrmgBysexwXnR45uKVpAB' },
-    'Fermentation':{ documentation:'1_7M91rSDdjP955aa3kVws2ckd6fMqhd2', works:'1qo4xBLzKMWuQivKdP_ae1d-sLrhIUFuj', electrical:'1J8VL8DAIq1NSpa0TMoO_RHcS9gAv4kL3', procedures:'1-6fpU69xeUINtjJZs5or9RQ8ijt4wvl0' },
-    'Proover':     { documentation:'1teDMsKfN8BFiq4tI6ml2Z3zAYvq8TAp3', works:'1_UUtAmRYoUSRxypEIroIzNtXmdQ4V7lf', electrical:'1t46LgFl2vlCyWMRzt3nH4G8kUHjBYJa7', procedures:'1RPm3egkh7Lmx2TBxXps0v6npE-f54dJr' },
-    'Freezer':     { documentation:'1-7C36DI_QIi-SHLPjOte9MVtE35EG5fN', works:'11H4BO7p-kPX2_3kPWW2wRzLp6Hk9JtPi', electrical:'1dQIp2J1HMv0gLYG4_P8B3D3sAHYEUBk9', procedures:'1oiO_33P7kT34wVM2oEbKQ8PGQcvk0M5P' },
-    'Cooler':      { documentation:'1H7FGsJFHmKkarrIGsbW2OuoMKK69WfdZ', works:'15-7Vvr-4FyZ7zbfNUY17qh0Gi6Si-M02', electrical:'1MXGIDNGMstOwHEdrywqk-SRuJcf6WnJX', procedures:'1DGyNIYh62A82On7Q_TYeHnPMTZRdLsac' },
+    'Fritsch': {
+      documentation:'FOLDER_ID',
+      works:'FOLDER_ID',
+      electrical:'FOLDER_ID',
+      procedures:'FOLDER_ID'
+    }
+    // Dodaj ostale strojeve po potrebi...
   },
   'Bakery 2': {
-    'Mixing':{ documentation:'1_kzKmh_I-eZVktunneF5ALqMIVBFSANG', works:'1hmMsIkNbsQVlwHkQ8Ow5KVTA3vDwSPlH', electrical:'1VBfupXPwz3Pxhum3RCOZdCylW0AK7Mf0', procedures:'1q8fLx5e0MuLJAVh10Ea7oAONPyyomXXA' }
-    /* ... ostalo ostaje kao u tvojoj datoteci ... */
+    // ...
   },
   'Bakery 3': {
-    'Site 1 Packing': { documentation:'1J210oJpvaS2VhXOMaQm8oXAFbCW8FDa7', works:'1emCk6hQQF25eMn8D7LyJD4uyqt4vFfQW', electrical:'1mG4EyGxk4Be4nbV_WW316FqzuTl1QCR-', procedures:'1DJwbexql1dakzKXYDvofvFam9vTuikS' }
-    /* ... ostalo ostaje kao u tvojoj datoteci ... */
+    // Ako želiš da odmah otvori 4 kvadrata bez liste strojeva, koristi placeholder ključ '—':
+    // '—': { documentation:'ID', works:'ID', electrical:'ID', procedures:'ID' }
   }
 };
 
@@ -132,7 +146,7 @@ const CATS = {
   procedures:    { title:'Procedures',          color:'c4', desc:'SOPs & guides' }
 };
 
-/* Router */
+/* Router helpers */
 function params(){ return new URLSearchParams(location.search); }
 function go(obj){ const u=new URL(location.href); u.search=new URLSearchParams(obj).toString(); history.pushState({},'',u); draw(); }
 window.addEventListener('popstate', draw);
@@ -148,8 +162,7 @@ function crumbsSet(items){
 
 function drawHome(){
   crumbsSet([{label:'Home'}]);
-  const view=document.getElementById('view');
-  view.innerHTML='';
+  const view=document.getElementById('view'); view.innerHTML='';
   const wrap=document.createElement('div'); wrap.className='stack';
   ['Bakery 1','Bakery 2','Bakery 3'].forEach(b=>{
     const a=document.createElement('a'); a.className='tile'; a.href=`?bakery=${encodeURIComponent(b)}`;
@@ -162,7 +175,7 @@ function drawBakery(b){
   crumbsSet([{label:'Home',to:{}},{label:b,to:{bakery:b}}]);
   const view=document.getElementById('view'); view.innerHTML='';
   const machines = MACHINES[b]||[];
-  if(!machines.length){ drawMachine(b,'—'); return; }
+  if(!machines.length){ drawMachine(b,'—'); return; } // Bakery 3 placeholder
   const wrap=document.createElement('div'); wrap.className='stack';
   machines.forEach(m=>{
     const a=document.createElement('a'); a.className='tile'; a.href=`?bakery=${encodeURIComponent(b)}&machine=${encodeURIComponent(m)}`;
@@ -184,10 +197,25 @@ function drawMachine(b,m){
   card.appendChild(grid); document.getElementById('view').appendChild(card);
 }
 
-/* Google Drive integration */
-let accessToken=null, gapiReady=false;
-async function ensureGapi(){ if(gapiReady) return; await new Promise(r=>gapi.load('client',r)); await gapi.client.init({apiKey:API_KEY, discoveryDocs:['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']}); gapiReady=true; }
-async function ensureAuth(){ if(accessToken) return accessToken; await ensureGapi(); return new Promise((res,rej)=>{ const c=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPES,callback:r=>{ if(r&&r.access_token){accessToken=r.access_token;res(accessToken);} else rej(new Error('No token')); }}); c.requestAccessToken({prompt:'consent'}); }); }
+/* Drive integration */
+let accessToken=null,gapiReady=false;
+async function ensureGapi(){
+  if(gapiReady) return;
+  await new Promise(r=>gapi.load('client',r));
+  await gapi.client.init({apiKey:API_KEY,discoveryDocs:['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']});
+  gapiReady=true;
+}
+async function ensureAuth(){
+  if(accessToken) return accessToken;
+  await ensureGapi();
+  return new Promise((res,rej)=>{
+    const c=google.accounts.oauth2.initTokenClient({
+      client_id:CLIENT_ID, scope:SCOPES,
+      callback:r=>{ if(r&&r.access_token){accessToken=r.access_token;res(accessToken);} else rej(new Error('No token')); }
+    });
+    c.requestAccessToken({prompt:'consent'});
+  });
+}
 
 function folderIdFor(b,m,cat){ return FOLDERS?.[b]?.[m]?.[cat] || null; }
 
@@ -198,9 +226,9 @@ function drawCategory(b,m,catKey){
   const card=document.createElement('div'); card.className='card';
   const h=document.createElement('h3'); h.textContent=`${b} › ${m} › ${cat.title}`; card.appendChild(h);
 
-  const fid = folderIdFor(b,m,catKey);
+  const fid=folderIdFor(b,m,catKey);
   const hint=document.createElement('div'); hint.className='small';
-  hint.innerHTML = fid ? `Folder ID: <code>${escapeHtml(fid)}</code>` : `⚠️ Set Drive folder ID in <code>FOLDERS</code>.`;
+  hint.innerHTML=fid?`Folder ID: <code>${escapeHtml(fid)}</code>`:`⚠️ Set Drive folder ID in <code>FOLDERS</code>.`;
   card.appendChild(hint);
 
   const bar=document.createElement('div'); bar.className='toolbar';
@@ -208,72 +236,47 @@ function drawCategory(b,m,catKey){
   const file=document.createElement('input'); file.type='file'; file.accept='application/pdf,image/*';
   const up=document.createElement('button'); up.className='btn'; up.textContent='Upload';
   const refresh=document.createElement('button'); refresh.className='btn ghost'; refresh.textContent='Refresh';
+  const adminBtn=document.createElement('button'); adminBtn.className='btn ghost'; adminBtn.textContent='Admin: Sign in';
 
-  const openPublic = document.createElement('a');
-  openPublic.className = 'btn';
-  openPublic.textContent = 'Open folder (no login)';
-  openPublic.href = fid ? `https://drive.google.com/drive/folders/${fid}` : '#';
-  openPublic.target = '_blank'; openPublic.rel = 'noopener';
-
-  const adminBtn = document.createElement('button');
-  adminBtn.className = 'btn ghost';
-  adminBtn.textContent = 'Admin: Sign in';
-
-  bar.prepend(openPublic, adminBtn);
-  bar.append(search,file,up,refresh);
+  bar.append(adminBtn,search,file,up,refresh);
   card.appendChild(bar);
 
   const list=document.createElement('div'); list.className='list'; card.appendChild(list);
   view.appendChild(card);
 
-  file.style.display = 'none';
-  up.style.display = 'none';
+  file.style.display='none'; up.style.display='none';
 
   /* PUBLIC list (no login) */
   async function publicListFiles(){
-    list.innerHTML = '<div class="small">Loading…</div>';
+    list.innerHTML='<div class="small">Loading…</div>';
     try{
-      if(!fid){ list.innerHTML = '<div class="small">Set Drive folder ID.</div>'; return; }
-      const params = new URLSearchParams({
-        q: `('${fid}' in parents) and trashed=false`,
-        fields: 'files(id,name,modifiedTime,mimeType,webViewLink)',
-        orderBy: 'modifiedTime desc',
-        pageSize: '100',
-        key: API_KEY
+      if(!fid){ list.innerHTML='<div class="small">Set Drive folder ID.</div>'; return; }
+      const params=new URLSearchParams({
+        q:`('${fid}' in parents) and trashed=false`,
+        fields:'files(id,name,modifiedTime,mimeType,webViewLink)',
+        orderBy:'modifiedTime desc',
+        pageSize:'100',
+        key:API_KEY,
+        supportsAllDrives:'true',
+        includeItemsFromAllDrives:'true'
       });
-      const res = await fetch('https://www.googleapis.com/drive/v3/files?' + params.toString());
-      if(!res.ok){ const j = await res.json().catch(()=>({})); throw new Error(j.error?.message || ('HTTP '+res.status)); }
-      const data = await res.json();
-      let items = data.files || [];
-      const s = (search.value||'').toLowerCase();
-      if(s) items = items.filter(f => (f.name||'').toLowerCase().includes(s));
-      if(!items.length){ list.innerHTML = '<div class="small">No files yet.</div>'; return; }
-      list.innerHTML = '';
-
+      const res=await fetch('https://www.googleapis.com/drive/v3/files?'+params.toString());
+      if(!res.ok){ const j=await res.json().catch(()=>({})); throw new Error(j.error?.message||('HTTP '+res.status)); }
+      const data=await res.json(); let items=data.files||[];
+      const s=(search.value||'').toLowerCase(); if(s) items=items.filter(f=>(f.name||'').toLowerCase().includes(s));
+      if(!items.length){ list.innerHTML='<div class="small">No files yet.</div>'; return; }
+      list.innerHTML='';
       items.forEach(f=>{
-        const row = document.createElement('div'); row.className='item';
-
-        const title = document.createElement('a');
-        title.className='title';
-        title.href = f.webViewLink || `https://drive.google.com/file/d/${f.id}/view`;
-        title.target='_blank'; title.rel='noopener';
-        const when = f.modifiedTime ? new Date(f.modifiedTime).toLocaleString() : '';
-        title.innerHTML = `<div><strong>${escapeHtml(f.name)}</strong><div class="meta">${escapeHtml(f.mimeType||'')} • ${escapeHtml(when)}</div></div>`;
-
-        const dl = document.createElement('a');
-        dl.className='icon-btn';
-        dl.href = `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${API_KEY}`;
-        dl.target='_blank'; dl.rel='noopener';
-        dl.innerHTML = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 3v10m0 0 4-4m-4 4-4-4M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-
-        row.append(title, dl);
-        list.appendChild(row);
+        const row=document.createElement('div'); row.className='item';
+        const title=document.createElement('a'); title.className='title';
+        title.href=f.webViewLink||`https://drive.google.com/file/d/${f.id}/view`; title.target='_blank'; title.rel='noopener';
+        const when=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
+        title.innerHTML=`<div><strong>${escapeHtml(f.name)}</strong><div class="meta">${escapeHtml(f.mimeType||'')} • ${escapeHtml(when)}</div></div>`;
+        const dl=document.createElement('a'); dl.className='icon-btn'; dl.href=`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${API_KEY}`; dl.target='_blank'; dl.rel='noopener';
+        dl.innerHTML=`<svg viewBox="0 0 24 24" fill="none"><path d="M12 3v10m0 0 4-4m-4 4-4-4M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        row.append(title,dl); list.appendChild(row);
       });
-    }catch(e){
-      console.error(e);
-      list.innerHTML = `<div class="small">Public list error: ${escapeHtml(e.message||String(e))}.
-        <br/>If you see 403/401, set folder/files to “Anyone with the link → Viewer”, or use Admin Sign-in.</div>`;
-    }
+    }catch(e){ list.innerHTML=`<div class="small">Public list error: ${escapeHtml(e.message||String(e))}</div>`; }
   }
 
   /* PRIVATE list (admin) */
@@ -281,45 +284,36 @@ function drawCategory(b,m,catKey){
     list.innerHTML='<div class="small">Loading…</div>';
     try{
       if(!fid){ list.innerHTML='<div class="small">Set Drive folder ID.</div>'; return; }
-      const q = `('${fid}' in parents) and trashed=false`;
-      const res = await gapi.client.drive.files.list({ q, fields:'files(id,name,modifiedTime,mimeType,webViewLink)', orderBy:'modifiedTime desc', pageSize:100 });
+      const q=`('${fid}' in parents) and trashed=false`;
+      const res=await gapi.client.drive.files.list({
+        q, fields:'files(id,name,modifiedTime,mimeType,webViewLink)',
+        orderBy:'modifiedTime desc', pageSize:100,
+        supportsAllDrives:true, includeItemsFromAllDrives:true
+      });
       let items=res.result.files||[];
-      const s=(search.value||'').toLowerCase();
-      if(s) items=items.filter(f=>(f.name||'').toLowerCase().includes(s));
+      const s=(search.value||'').toLowerCase(); if(s) items=items.filter(f=>(f.name||'').toLowerCase().includes(s));
       if(!items.length){ list.innerHTML='<div class="small">No files yet.</div>'; return; }
       list.innerHTML='';
-
       items.forEach(f=>{
         const row=document.createElement('div'); row.className='item';
-
-        const title = document.createElement('a');
-        title.className='title';
-        title.href = f.webViewLink || `https://drive.google.com/file/d/${f.id}/view`;
-        title.target='_blank'; title.rel='noopener';
+        const title=document.createElement('a'); title.className='title';
+        title.href=f.webViewLink||`https://drive.google.com/file/d/${f.id}/view`; title.target='_blank'; title.rel='noopener';
         const when=f.modifiedTime?new Date(f.modifiedTime).toLocaleString():'';
-        title.innerHTML = `<div><strong>${escapeHtml(f.name)}</strong><div class="meta">${escapeHtml(f.mimeType||'')} • ${escapeHtml(when)}</div></div>`;
-
-        const right = document.createElement('div'); right.style.display='flex'; right.style.gap='8px';
-
-        const dl=document.createElement('a');
-        dl.className='icon-btn';
-        dl.href=`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`;
-        dl.target='_blank'; dl.rel='noopener';
-        dl.innerHTML = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 3v10m0 0 4-4m-4 4-4-4M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-
-        const del=document.createElement('button');
-        del.className='icon-btn';
-        del.innerHTML = `<svg viewBox="0 0 24 24" fill="none"><path d="M6 7h12M10 7v12m4-12v12M9 7l1-2h4l1 2M6 7l1 14h10l1-14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        title.innerHTML=`<div><strong>${escapeHtml(f.name)}</strong><div class="meta">${escapeHtml(f.mimeType||'')} • ${escapeHtml(when)}</div></div>`;
+        const right=document.createElement('div'); right.style.display='flex'; right.style.gap='8px';
+        const dl=document.createElement('a'); dl.className='icon-btn'; dl.href=`https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`; dl.target='_blank'; dl.rel='noopener';
+        dl.innerHTML=`<svg viewBox="0 0 24 24" fill="none"><path d="M12 3v10m0 0 4-4m-4 4-4-4M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        const del=document.createElement('button'); del.className='icon-btn';
+        del.innerHTML=`<svg viewBox="0 0 24 24" fill="none"><path d="M6 7h12M10 7v12m4-12v12M9 7l1-2h4l1 2M6 7l1 14h10l1-14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
         del.onclick=async()=>{ if(!confirm('Delete file?')) return;
           try{ await gapi.client.drive.files.delete({fileId:f.id}); privateListFiles(); }
           catch(e){ alert('Delete failed: '+(e.result?.error?.message||e.message)); }
         };
-
         right.append(dl, del);
         row.append(title, right);
         list.appendChild(row);
       });
-    }catch(e){ console.error(e); list.innerHTML=`<div class='small'>Error: ${escapeHtml(e.message||String(e))}</div>`; }
+    }catch(e){ list.innerHTML=`<div class='small'>Error: ${escapeHtml(e.message||String(e))}</div>`; }
   }
 
   /* init */
@@ -330,22 +324,22 @@ function drawCategory(b,m,catKey){
   adminBtn.onclick = async () => {
     try{
       await ensureAuth();
-      file.style.display = '';
-      up .style.display  = '';
+      file.style.display=''; up.style.display='';
       refresh.onclick = privateListFiles;
-      search .oninput = privateListFiles;
-      adminBtn.style.display = 'none';
+      search.oninput   = privateListFiles;
+      adminBtn.style.display='none';
       await privateListFiles();
     }catch(e){ alert('Sign-in failed: ' + (e.message || String(e))); }
   };
 
-  /* Upload (ostavljeno kao prije) */
+  /* Upload (base64 multipart; za veće fajlove može se prebaciti na resumable) */
   up.onclick=async()=>{
     try{
       if(!fid){ alert('Set Drive folder ID in FOLDERS.'); return; }
       if(!file.files || !file.files[0]){ alert('Choose a file'); return; }
       await ensureAuth(); up.disabled=true; up.textContent='Uploading…';
       const newId = await uploadToDrive(fid, file.files[0]);
+      // učini javno čitljivim (ako treba public view)
       await gapi.client.drive.permissions.create({ fileId: newId, resource: { type: 'anyone', role: 'reader' } });
       file.value='';
       setTimeout(()=>privateListFiles().catch(console.error),300);
@@ -354,6 +348,7 @@ function drawCategory(b,m,catKey){
   };
 }
 
+/* Base64 multipart upload (jednostavno); za >20MB može se staviti resumable */
 async function uploadToDrive(folderId, file){
   const boundary='-------314159265358979323846';
   const delimiter=`\r\n--${boundary}\r\n`;
@@ -362,7 +357,11 @@ async function uploadToDrive(folderId, file){
   const ab=await file.arrayBuffer(); const b64=btoa(String.fromCharCode(...new Uint8Array(ab)));
   const body=delimiter+'Content-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+
              delimiter+'Content-Type: '+(file.type||'application/octet-stream')+'\r\nContent-Transfer-Encoding: base64\r\n\r\n'+b64+closeDelim;
-  const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'multipart/related; boundary='+boundary},body});
+  const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'multipart/related; boundary='+boundary},
+    body
+  });
   if(!r.ok){ const j=await r.json().catch(()=>({})); throw new Error(j.error?.message||'Upload failed'); }
   const created = await r.json();
   return created.id;
@@ -392,3 +391,4 @@ if(sessionStorage.getItem("unlocked") === "1"){ lock.style.display = "none"; }
 </script>
 </body>
 </html>
+
