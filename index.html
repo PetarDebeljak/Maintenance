@@ -123,21 +123,49 @@ const MACHINES = {
 const FOLDERS = {
   'Bakery 1': {
     'Fritsch': {
-      documentation:'FOLDER_ID',
-      works:'FOLDER_ID',
-      electrical:'FOLDER_ID',
-      procedures:'FOLDER_ID'
+      documentation: '1uKMNjOdQltXZDMOrjs8nCDdQNdU0Dupw',
+      works:         '1M0NE6MtE0i-RNcckiFT8KCoMMwYdOdG_',
+      electrical:    '1RCWfvgcjDVCbutedlh3lyWjJ_kW5As9L',
+      procedures:    '1ismVYGrYFzwSbzxcoY_xki_KLhkdPpz0'
     }
-    // Dodaj ostale strojeve po potrebi...
-  },
+    // ovdje po želji dodaj još strojeva Bakery 1:
+  ,'Mixing':     { documentation:'1YG_ASV5ZG_rcSMKfcpjfU42w52CISWOn', works:'1NSIQBwmVfrocWgnMNOifWPDEmGx4dsc1', electrical:'1MiaraFYz59FaoMY_P-83-x5nyiB5-oFM', procedures:'1LMez4eD_gbCg70NBXxo73YgjZHthzs6U' }
+, 'Oven':       { documentation:'1t5dNT63qYVHzvH07UK4zqjs2c2jmdY0p', works:'1pu8f-rkqxH6x_q69X8xmCdEuCDambyjF', electrical:'1w1N5FbwoRPDYYkU3UvCINLece900dlMZ', procedures:'10sw8HYDASd0RrmgBysexwXnR45uKVpAB' },
+    'Fermentation':       { documentation:'1_7M91rSDdjP955aa3kVws2ckd6fMqhd2', works:'1qo4xBLzKMWuQivKdP_ae1d-sLrhIUFuj', electrical:'1J8VL8DAIq1NSpa0TMoO_RHcS9gAv4kL3', procedures:'1-6fpU69xeUINtjJZs5or9RQ8ijt4wvl0' },
+    'Proover':     { documentation:'1teDMsKfN8BFiq4tI6ml2Z3zAYvq8TAp3', works:'1_UUtAmRYoUSRxypEIroIzNtXmdQ4V7lf', electrical:'1t46LgFl2vlCyWMRzt3nH4G8kUHjBYJa7', procedures:'1RPm3egkh7Lmx2TBxXps0v6npE-f54dJr' },
+    'Freezer':     { documentation:'1-7C36DI_QIi-SHLPjOte9MVtE35EG5fN', works:'11H4BO7p-kPX2_3kPWW2wRzLp6Hk9JtPi', electrical:'1dQIp2J1HMv0gLYG4_P8B3D3sAHYEUBk9', procedures:'1oiO_33P7kT34wVM2oEbKQ8PGQcvk0M5P' },
+    'Cooler':     { documentation:'1H7FGsJFHmKkarrIGsbW2OuoMKK69WfdZ', works:'15-7Vvr-4FyZ7zbfNUY17qh0Gi6Si-M02', electrical:'1MXGIDNGMstOwHEdrywqk-SRuJcf6WnJX', procedures:'1DGyNIYh62A82On7Q_TYeHnPMTZRdLsac' },
+  }, // ⬅️ VAŽNO: zarez nakon zatvaranja 'Bakery 1' bloka
+
   'Bakery 2': {
-    // ...
+    'Mixing':     { documentation:'1_kzKmh_I-eZVktunneF5ALqMIVBFSANG', works:'1hmMsIkNbsQVlwHkQ8Ow5KVTA3vDwSPlH', electrical:'1VBfupXPwz3Pxhum3RCOZdCylW0AK7Mf0', procedures:'1q8fLx5e0MuLJAVh10Ea7oAONPyyomXXA' },
+    'Fermentation':{ documentation:'15r13fCr4CxGuK00Lbg-W__kjn5nET0Hj', works:'1wiSxlj8bkQ13lU3G701ztg8gNqiI6fyg', electrical:'1UOzZbFjwfCtQcWG04-xXN6vdJuNp0zwh', procedures:'1kN7MMl9TE0yCZ-J42860MWz4ZmGWF7Dw' },
+    'Spiro':{ documentation:'1JZXSmYawAyyXvWT2jnUovaqX3D-fJ0EH', works:'1Q35Y56uV4yjwOr1140Eyj8TpOPMalvpc', electrical:'1QcxnK2LjNhSvv66_ae3kPV8K6vQfu4fI', procedures:'1NRoHEF1MesnbjzA1Cg5Q3vw1TtKhJSYD' },
+    'Scarifier':{ documentation:'1m6I1Og91ma9-FEf4uGKqg5OZ-sNJJLrG', works:'1yb5vRkm1fbluscJ41RNIv2_uFIMVHjGE', electrical:'1L3Pq0cBlKZ6SaTpBr4HANygvz4p4hmhI', procedures:'1Rxgeet6GRX_aHcfFJhNN8jK1hDH2m4Mg' },
+    'Retarder':{ documentation:'1jg0FvErsRrnz_mOOeu3mCJAwX3AlJ26W', works:'1XqlFXZmukKz-tgVXoDMsXICQFgDcUVZE', electrical:'1i_azmPjg2oz5-4X8gLEbugT1dJ3-AzwF', procedures:'1ueMJa-EF_RMUvqQy-ETP1wkSswoAQkds' },
+    'Rademaker':{ documentation:'1QRlaG20Rtc30iaKwdYbWHrNZId7k9URq', works:'1Li4ckJxG2qPOP8NQ13pDeHOgBo9Oig_H', electrical:'1qYv1EHkzzzdEMRT6aBFUYmNLHDVDcTUS', procedures:'1rPA3eIXUkBJyZqhQifAbYPcBDsbTa7EP' },
+    'Proover':{ documentation:'1WcQWdVOYqqobaD8uoc3s5l1FCw8xkHim', works:'1J7FF4Rcmhpme0ltz0c6cmFvtNPCHHFSk', electrical:'1Az4ig6kyEK-ubVenXNJOmsTwTqezQDQ1', procedures:'1JuNU5TJvIW3mDHCkWHYbdqVBWlAmj83C' },
+    'Pattyn Tilting Conveyer':{ documentation:'1mI6mpPWbIRmOiwbl9iQdUvF9SHdISij2', works:'1QQH0oYPbNr_R1wj8VxIMwlFvW0x4zza2', electrical:'1zJ8v5-ghuO7x9RbtttIbVttj7e9b5Q-i', procedures:'1wj2BtkPnTQvEuyluzseBXxrkK9OGB7in' },
+    'Packing':{ documentation:'1tTpmHrNiK3eO-8UME6amkBGcBCqogOoG', works:'1jxDJO0hSSHQ-8KIQSQUcCmocq0jyGQWb', electrical:'14PUHHjr0GOtNaMQPTADKCxj7pZCa9Do5', procedures:'1myVmfW9HnlfRdM-FMeAx1REqaiSBhqFs' },
+    'Oven':{ documentation:'1GHVtXJi0KMPdIf7z_W0SGU0BiudjQPSO', works:'1wOn_2XRKn9WP8PK8quuL9fGxS56-GMJp', electrical:'1DGl4po1gULH2gQkYC_4I5eWemomZf_D8', procedures:'1mknL-hrBx3AbPbpMElftIyKkqqs1jwnM' },
+    'MIB':{ documentation:'1twize6Omq1WUxt631UIlvXoWG6Kmy-XS', works:'1gbII6qemYbyQVSjGivbn8_Ku6cEFX1pR', electrical:'1c4vr73nrDie8sGfGz2VqvMMYhGh1z-Fn', procedures:'1NI0RK4Mp6zeyJ0R1PFfam_auoHJAMRfs' },
+    'Freezer':{ documentation:'1C4mCKM1DkXJwD-gVMf4spO8REjc6LDTC', works:'1vnbdMMISy38_SiJpVOuVoyC0UUEDaZaV', electrical:'1xqcwh5GvmZgSkCyffzQNINw4P_91W4Df', procedures:'1X14Fgcb8rESKIGQNXVo1bVT9cYn_f4s6' },
+    'Cooler':{ documentation:'1tEemK1qcOlAn55CLOCWyUgS4PdASNbQ5', works:'1CUMUsoIRNl0PO8mQoK0-EmgHxMFuZLXI', electrical:'1dHbBL4-iVcekRBlTIr7jdUz17kL8MZUj', procedures:'1fcL8I_FZqD_JEmiuerWKyGN_8TJo09hU' },
+    'Baggers':{ documentation:'1llq6U95hQc3NcGg1JDqOBKbmxJxsYcUR', works:'1HrGgPLFF4sUmc2FXsBlr_KNgdiEmnyUJ', electrical:'1J1W8STCRjfGfv4q91ZyxkyKiEUev_cAA', procedures:'1GewCaKsiOLEukax4ZIZTSP42k-WFR280' },
+    'AHU':{ documentation:'1QMKYSOQ-N0LVANk8MZNiB07DTKI-QC7U', works:'1tSXor0e_YtcabRFabUO_AOhEMjzTttuh', electrical:'1m3CYpvbWyqJBX022oiOwJNcBayqOFF1a', procedures:'1PcPbWgBbTDnPZAidlPI-_T4-fpJP2q0o' },    
+    
+    
   },
+
   'Bakery 3': {
-    // Ako želiš da odmah otvori 4 kvadrata bez liste strojeva, koristi placeholder ključ '—':
-    // '—': { documentation:'ID', works:'ID', electrical:'ID', procedures:'ID' }
+    // Ako želiš odmah 4 kvadrata bez strojeva, koristi placeholder '—':
+    'Site 1 Packing': { documentation:'1J210oJpvaS2VhXOMaQm8oXAFbCW8FDa7', works:'1emCk6hQQF25eMn8D7LyJD4uyqt4vFfQW', electrical:'1mG4EyGxk4Be4nbV_WW316FqzuTl1QCR-', procedures:'1DJwbexql1dakzKXYDvofvFam9vTuikS' },
+    'Site 2 Packing': { documentation:'1OovqnA9jsAdFJSxeeWj9Dr9K4VUya5yi', works:'15C_uMSqzoJjdSpBfE6xVpBEbiWeBgZn-', electrical:'17pLXNKAOomUOwo642WazWVboOwJiZPCl', procedures:'1u1Ipt5v375gwd8CufIkc3TckKTQA-dKE' },
+    'Paletiser': { documentation:'1exaNF6HaJVw4D8ODVdDDiurYhxGzmn-8', works:'1Nd3vqzlvIw2reDo2ELeCw5q_UC5YRR8y', electrical:'1r8lSFtNAwSoMpPSVouj7Jv39WeL5xmXw', procedures:'1CNgEId5CKxNlMcwmZxJsIG0DQB266s5Y' }, 
+    'Retail':{ documentation:'1tghnGJ1e09FnOwhTV1UKZpSl-XRT62On', works:'1hoUvzxjpA6z2TTggwiSj-7CMfkQ40rCB', electrical:'1QIkmIstBW4RKryafamYp38Jnr3DLLtlm', procedures:'1soZAoyN9pp4xTkKcQczMH37Yqx8t48EA' },
   }
 };
+
 
 const CATS = {
   documentation: { title:'Documentation',       color:'c1', desc:'User manuals & technical docs' },
