@@ -259,27 +259,47 @@ async function fetchPrivateBlob(fileId){
   if(!r.ok) throw new Error('Fetch failed '+r.status);
   return await r.blob();
 }
-async function openInlinePreview(f,isAdmin){
+async function openInlinePreview(f, isAdmin){
   try{
     previewTitleEl.textContent = f.name || 'Preview';
-    previewDownload.href = isAdmin ? `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`
-                                   : publicDownloadUrl(f.id);
+    // link za download ostaje isti
+    previewDownload.href = isAdmin
+      ? `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`
+      : `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${API_KEY}`;
+
     const isImage = (f.mimeType||'').startsWith('image/');
-    if(isPdf(f.mimeType) || /\.pdf$/i.test(f.name||'') || isImage){
+    const isLikelyPdf = isPdf(f.mimeType) || /\.pdf$/i.test(f.name||'');
+
+    // 1) Preferirajmo Drive PREVIEW koji radi u iframeu gotovo svugdje
+    const previewUrl = `https://drive.google.com/file/d/${f.id}/preview`;
+
+    if(isLikelyPdf || isImage){
+      // prvo pokušaj blob (admin), inače odmah preview URL
       if(isAdmin){
-        const blob = await fetchPrivateBlob(f.id);
-        const url  = URL.createObjectURL(blob);
-        previewFrame.dataset.blobUrl = url;
-        previewFrame.src = url;
-      }else{
-        previewFrame.src = publicDownloadUrl(f.id);
+        try{
+          const blob = await fetchPrivateBlob(f.id);
+          const url  = URL.createObjectURL(blob);
+          previewFrame.dataset.blobUrl = url;
+          previewFrame.src = url;
+          showPreview();
+          return;
+        }catch(e){
+          // blob pao → fallback na preview
+          console.warn('Blob preview failed, falling back to Drive preview:', e);
+        }
       }
+      // public ili fallback
+      previewFrame.src = previewUrl;
       showPreview();
-    }else{
+    } else {
+      // nepoznati/Google Docs formati → otvori Drive view
       window.open(f.webViewLink || `https://drive.google.com/file/d/${f.id}/view`, '_blank');
     }
-  }catch(e){ alert('Preview failed: '+(e.message||String(e))); }
+  }catch(e){
+    alert('Preview failed: '+(e.message||String(e)));
+  }
 }
+
 
 /* Drive integration */
 let accessToken=null,gapiReady=false;
