@@ -189,8 +189,57 @@ const CATS = {
 const WORKS_SHEETS = {
   'Bakery 1': {
     // Primjer: odkomentiraj, zamijeni SHEET_ID i (opcionalno) sheetName:
-     'Fritsch': { sheetId: 'https://docs.google.com/spreadsheets/d/1a-7IMe_DUcw3U-RtSokngOkEiWlTLexHnofp3JnASx4/edit?gid=323035775#gid=323035775', sheetName: 'Work Histories' }
-  },
+     'Fritsch': { sheetId: 'https://docs.google.com/spreadsheets/d/1a-7IMe_DUcw3U-RtSokngOkEiWlTLexHnofp3JnASx4/edit?usp=drive_web&ouid=100115508581340473604', sheetName: 'Work Histories' }
+  async function fetchSheetTable(sheetId, sheetName, gid){
+  // 1) Pokušaj gviz JSON ako imamo sheetName
+  if (sheetName) {
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const text = await res.text();
+      const jsonText = text.replace(/^[^{]+/, '').replace(/;?$/,'');
+      const data = JSON.parse(jsonText);
+      const cols = (data.table.cols||[]).map(c => c.label || c.id || '');
+      const rows = (data.table.rows||[]).map(r => (r.c||[]).map(c => (c ? (c.f || c.v || '') : '')));
+      return { headers: cols, rows };
+    }
+    // ako sheetName ne radi (404/403) i imamo gid, idi na CSV
+    if (!gid) throw new Error('Sheet fetch failed '+res.status);
+  }
+
+  // 2) CSV fallback po gid (brzo i robusno)
+  if (gid) {
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&id=${sheetId}&gid=${gid}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('CSV fetch failed '+res.status);
+    const text = await res.text();
+
+    // jednostavan CSV parser (podržava navodnike)
+    const lines = text.replace(/\r/g,'').split('\n');
+    const rows = [];
+    let row = [], inQuotes = false, field = '';
+    for (let i=0; i<text.length; i++){
+      const ch = text[i], next = text[i+1];
+      if (inQuotes){
+        if (ch === '"' && next === '"'){ field += '"'; i++; }
+        else if (ch === '"'){ inQuotes = false; }
+        else { field += ch; }
+      } else {
+        if (ch === '"'){ inQuotes = true; }
+        else if (ch === ','){ row.push(field); field=''; }
+        else if (ch === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+        else if (ch === '\r'){ /* ignore */ }
+        else { field += ch; }
+      }
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+
+    const headers = rows.shift() || [];
+    return { headers, rows };
+  }
+
+  throw new Error('No sheetName or gid configured.');
+}},
   'Bakery 2': {},
   'Bakery 3': {}
 };
@@ -317,16 +366,55 @@ async function ensureAuth(){
 function folderIdFor(b,m,cat){ return FOLDERS?.[b]?.[m]?.[cat] || null; }
 
 /* ===== WORK HISTORY VIEWER (Google Sheets) ===== */
-async function fetchSheetTable(sheetId, sheetName){
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName||'Sheet1')}`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error('Sheet fetch failed '+res.status);
-  const text = await res.text();
-  const jsonText = text.replace(/^[^{]+/, '').replace(/;?$/,'');
-  const data = JSON.parse(jsonText);
-  const cols = (data.table.cols||[]).map(c => c.label || c.id || '');
-  const rows = (data.table.rows||[]).map(r => (r.c||[]).map(c => (c ? (c.f || c.v || '') : '')));
-  return { headers: cols, rows };
+async function fetchSheetTable(sheetId, sheetName, gid){
+  // 1) Pokušaj gviz JSON ako imamo sheetName
+  if (sheetName) {
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const text = await res.text();
+      const jsonText = text.replace(/^[^{]+/, '').replace(/;?$/,'');
+      const data = JSON.parse(jsonText);
+      const cols = (data.table.cols||[]).map(c => c.label || c.id || '');
+      const rows = (data.table.rows||[]).map(r => (r.c||[]).map(c => (c ? (c.f || c.v || '') : '')));
+      return { headers: cols, rows };
+    }
+    // ako sheetName ne radi (404/403) i imamo gid, idi na CSV
+    if (!gid) throw new Error('Sheet fetch failed '+res.status);
+  }
+
+  // 2) CSV fallback po gid (brzo i robusno)
+  if (gid) {
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&id=${sheetId}&gid=${gid}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('CSV fetch failed '+res.status);
+    const text = await res.text();
+
+    // jednostavan CSV parser (podržava navodnike)
+    const lines = text.replace(/\r/g,'').split('\n');
+    const rows = [];
+    let row = [], inQuotes = false, field = '';
+    for (let i=0; i<text.length; i++){
+      const ch = text[i], next = text[i+1];
+      if (inQuotes){
+        if (ch === '"' && next === '"'){ field += '"'; i++; }
+        else if (ch === '"'){ inQuotes = false; }
+        else { field += ch; }
+      } else {
+        if (ch === '"'){ inQuotes = true; }
+        else if (ch === ','){ row.push(field); field=''; }
+        else if (ch === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+        else if (ch === '\r'){ /* ignore */ }
+        else { field += ch; }
+      }
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+
+    const headers = rows.shift() || [];
+    return { headers, rows };
+  }
+
+  throw new Error('No sheetName or gid configured.');
 }
 function renderWorksTable(container, table){
   container.innerHTML = '';
