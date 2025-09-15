@@ -189,7 +189,7 @@ const CATS = {
 const WORKS_SHEETS = {
   'Bakery 1': {
     // Primjer: odkomentiraj, zamijeni SHEET_ID i (opcionalno) sheetName:
-     'Fritsch': { sheetId: 'https://docs.google.com/spreadsheets/d/1a-7IMe_DUcw3U-RtSokngOkEiWlTLexHnofp3JnASx4/edit?gid=323035775#gid=323035775', sheetName: 'WorkHistory' }
+     'Fritsch': { sheetId: 'https://docs.google.com/spreadsheets/d/1a-7IMe_DUcw3U-RtSokngOkEiWlTLexHnofp3JnASx4/edit?gid=323035775#gid=323035775', sheetName: 'Work Histories' }
   },
   'Bakery 2': {},
   'Bakery 3': {}
@@ -459,13 +459,21 @@ function drawCategory(b,m,catKey){
   file.style.display='none'; up.style.display='none';
 
   /* Ako je Work History i postoji Sheet, prikaži tablicu umjesto Drive listinga */
-  if(catKey === 'works'){
-    drawWorksSheetView(b, m, list).then(handled=>{
-      if(handled === true){
-        file.style.display='none'; up.style.display='none'; refresh.style.display='none';
-      }
-    }).catch(()=>{});
+  if (catKey === 'works') {
+  const sheetEntry = WORKS_SHEETS?.[b]?.[m];
+  if (sheetEntry && sheetEntry.sheetId) {
+    // sakrij alatne tipke jer tablica je read-only
+    file.style.display = 'none';
+    up.style.display = 'none';
+    refresh.style.display = 'none';
+    adminBtn.style.display = 'none';
+
+    drawWorksSheetView(b, m, list)
+      .catch(e => { list.innerHTML = `<div class="small">Failed to load Work History: ${escapeHtml(e.message||String(e))}</div>`; });
+
+    return; // ⬅️ ključno: ne postavljati Drive listing kad imamo Sheet
   }
+}
 
   /* PUBLIC list */
   async function publicListFiles(){
