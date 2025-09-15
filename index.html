@@ -25,7 +25,6 @@
   .title{font-weight:800}
   main{max-width:960px;margin:0 auto;padding:12px}
 
-  /* L1 & L2 */
   .stack{display:flex;flex-direction:column;gap:10px}
   .tile{
     display:block;background:linear-gradient(135deg,#fff,#f8fafc);
@@ -37,7 +36,6 @@
   .tile p{margin:0;color:var(--muted);font-size:.9rem}
   .tile:active{transform:translateY(1px)}
 
-  /* L3: 2x2 */
   .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .square{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center}
   .c1{background:#fef3c7}
@@ -91,7 +89,7 @@
 
   <!-- PREVIEW MODAL -->
   <div id="previewBackdrop" style="position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;z-index:9998;">
-    <div id="previewCard" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100vw,980px);height:min(100vh,88vh);background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;">
+    <div id="previewCard" style="position:absolute;left:50%;top:50%;transform:translate(-50%, -50%);width:min(100vw,980px);height:min(100vh,88vh);background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2e8f0;background:#f8fafc;padding:8px 12px;">
         <div id="previewTitle" style="font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Preview</div>
         <div style="display:flex;gap:8px;align-items:center">
@@ -123,9 +121,10 @@
   <script src="https://apis.google.com/js/api.js" async defer></script>
 
 <script>
-/******** QUICK SETUP (zadržane tvoje vrijednosti) ********/
+/******** QUICK SETUP (tvoje vrijednosti su zadržane) ********/
 const CLIENT_ID = '937032004801-nfma3pp3fkkck4mfk094imqgmvduj7ih.apps.googleusercontent.com';
 const API_KEY   = 'AIzaSyDnEsld28xzG1lQROwBO_ImDq2SxX4kcg8';
+// VAŽNO: za admin listing koristi puni drive scope
 const SCOPES    = 'https://www.googleapis.com/auth/drive';
 
 const MACHINES = {
@@ -134,7 +133,6 @@ const MACHINES = {
   'Bakery 3': ['Site 1 Packing','Site 2 Packing','Paletiser','Retail']
 };
 
-// === FOLDERS (preuređeno u ispravan JSON oblik, sadržaj ostaje isti) ===
 const FOLDERS = {
   'Bakery 1': {
     'Fritsch': {
@@ -182,6 +180,19 @@ const CATS = {
   works:         { title:'Work History',        color:'c2', desc:'Repairs, interventions' },
   electrical:    { title:'Electrical Diagrams', color:'c3', desc:'Wiring & schematics' },
   procedures:    { title:'Procedures',          color:'c4', desc:'SOPs & guides' }
+};
+
+/* === OPTIONAL: Work History preko Google Sheets ===
+   Ako za određeni stroj želiš tablični prikaz umjesto Drive listinga,
+   upiši SHEET ID i (po potrebi) sheetName. Ako nije postavljeno, ostaje Drive listing.
+*/
+const WORKS_SHEETS = {
+  'Bakery 1': {
+    // Primjer: odkomentiraj, zamijeni SHEET_ID i (opcionalno) sheetName:
+     'Fritsch': { sheetId: 'https://docs.google.com/spreadsheets/d/1a-7IMe_DUcw3U-RtSokngOkEiWlTLexHnofp3JnASx4/edit?gid=323035775#gid=323035775', sheetName: 'WorkHistory' }
+  },
+  'Bakery 2': {},
+  'Bakery 3': {}
 };
 
 /* Router helpers */
@@ -259,47 +270,29 @@ async function fetchPrivateBlob(fileId){
   if(!r.ok) throw new Error('Fetch failed '+r.status);
   return await r.blob();
 }
-async function openInlinePreview(f, isAdmin){
+async function openInlinePreview(f,isAdmin){
   try{
     previewTitleEl.textContent = f.name || 'Preview';
-    // link za download ostaje isti
-    previewDownload.href = isAdmin
-      ? `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`
-      : `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media&key=${API_KEY}`;
-
+    previewDownload.href = isAdmin ? `https://www.googleapis.com/drive/v3/files/${f.id}?alt=media`
+                                   : publicDownloadUrl(f.id);
     const isImage = (f.mimeType||'').startsWith('image/');
-    const isLikelyPdf = isPdf(f.mimeType) || /\.pdf$/i.test(f.name||'');
-
-    // 1) Preferirajmo Drive PREVIEW koji radi u iframeu gotovo svugdje
     const previewUrl = `https://drive.google.com/file/d/${f.id}/preview`;
-
-    if(isLikelyPdf || isImage){
-      // prvo pokušaj blob (admin), inače odmah preview URL
+    if(isPdf(f.mimeType) || /\.pdf$/i.test(f.name||'') || isImage){
       if(isAdmin){
         try{
           const blob = await fetchPrivateBlob(f.id);
           const url  = URL.createObjectURL(blob);
           previewFrame.dataset.blobUrl = url;
           previewFrame.src = url;
-          showPreview();
-          return;
-        }catch(e){
-          // blob pao → fallback na preview
-          console.warn('Blob preview failed, falling back to Drive preview:', e);
-        }
+          showPreview(); return;
+        }catch(e){ console.warn('Blob preview failed, fallback to Drive preview'); }
       }
-      // public ili fallback
-      previewFrame.src = previewUrl;
-      showPreview();
+      previewFrame.src = previewUrl; showPreview();
     } else {
-      // nepoznati/Google Docs formati → otvori Drive view
       window.open(f.webViewLink || `https://drive.google.com/file/d/${f.id}/view`, '_blank');
     }
-  }catch(e){
-    alert('Preview failed: '+(e.message||String(e)));
-  }
+  }catch(e){ alert('Preview failed: '+(e.message||String(e))); }
 }
-
 
 /* Drive integration */
 let accessToken=null,gapiReady=false;
@@ -323,6 +316,115 @@ async function ensureAuth(){
 
 function folderIdFor(b,m,cat){ return FOLDERS?.[b]?.[m]?.[cat] || null; }
 
+/* ===== WORK HISTORY VIEWER (Google Sheets) ===== */
+async function fetchSheetTable(sheetId, sheetName){
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName||'Sheet1')}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('Sheet fetch failed '+res.status);
+  const text = await res.text();
+  const jsonText = text.replace(/^[^{]+/, '').replace(/;?$/,'');
+  const data = JSON.parse(jsonText);
+  const cols = (data.table.cols||[]).map(c => c.label || c.id || '');
+  const rows = (data.table.rows||[]).map(r => (r.c||[]).map(c => (c ? (c.f || c.v || '') : '')));
+  return { headers: cols, rows };
+}
+function renderWorksTable(container, table){
+  container.innerHTML = '';
+  const bar = document.createElement('div'); bar.className='toolbar';
+  const search = document.createElement('input'); search.type='search'; search.placeholder='Search…';
+  const dlBtn = document.createElement('button'); dlBtn.className='btn ghost'; dlBtn.textContent='Download CSV';
+  bar.append(search, dlBtn); container.appendChild(bar);
+
+  const wrapper = document.createElement('div');
+  wrapper.style.overflowX='auto'; wrapper.style.background='#fff'; wrapper.style.border='1px solid #e2e8f0'; wrapper.style.borderRadius='10px';
+  const tableEl = document.createElement('table');
+  tableEl.style.width='100%'; tableEl.style.borderCollapse='separate'; tableEl.style.borderSpacing='0'; tableEl.style.fontSize='0.95rem';
+  wrapper.appendChild(tableEl); container.appendChild(wrapper);
+
+  const thead = document.createElement('thead');
+  const trh = document.createElement('tr');
+  table.headers.forEach((h, idx) => {
+    const th = document.createElement('th');
+    th.textContent = h || `Col ${idx+1}`;
+    th.style.textAlign='left'; th.style.padding='10px'; th.style.borderBottom='1px solid #e2e8f0'; th.style.background='#f8fafc';
+    th.style.position='sticky'; th.style.top='0'; th.style.zIndex='1'; th.style.cursor='pointer';
+    th.title = 'Click to sort';
+    th.addEventListener('click', () => { sortBy(idx); });
+    trh.appendChild(th);
+  });
+  thead.appendChild(trh); tableEl.appendChild(thead);
+  const tbody = document.createElement('tbody'); tableEl.appendChild(tbody);
+
+  let currentRows = table.rows.slice();
+  let sortCol = -1, sortDir = 1;
+
+  function renderBody(){
+    const q = (search.value||'').toLowerCase();
+    tbody.innerHTML = '';
+    currentRows.forEach(r => {
+      if(q){
+        const hit = r.some(v => String(v||'').toLowerCase().includes(q));
+        if(!hit) return;
+      }
+      const tr = document.createElement('tr');
+      r.forEach(v=>{
+        const td = document.createElement('td');
+        td.textContent = v==null ? '' : String(v);
+        td.style.padding='10px'; td.style.borderBottom='1px solid #eef2f7';
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  function sortBy(colIdx){
+    if(sortCol === colIdx){ sortDir *= -1; } else { sortCol = colIdx; sortDir = 1; }
+    currentRows.sort((a,b)=>{
+      const va = (a[colIdx]??'').toString().toLowerCase();
+      const vb = (b[colIdx]??'').toString().toLowerCase();
+      if(va<vb) return -1*sortDir;
+      if(va>vb) return 1*sortDir;
+      return 0;
+    });
+    renderBody();
+  }
+  search.addEventListener('input', renderBody);
+
+  dlBtn.onclick = ()=>{
+    const esc = (s)=>('"'+String(s??'').replace(/"/g,'""')+'"');
+    const lines = [
+      table.headers.map(esc).join(','),
+      ...currentRows.map(row=>row.map(esc).join(','))
+    ].join('\r\n');
+    const blob = new Blob([lines], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='work_history.csv'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  };
+
+  renderBody();
+}
+async function drawWorksSheetView(bakery, machine, container){
+  const entry = WORKS_SHEETS?.[bakery]?.[machine];
+  if(!entry || !entry.sheetId){
+    container.innerHTML = '<div class="small">No Google Sheet configured for this machine. Showing Drive folder instead.</div>';
+    return null; // nastavi s Drive listingom
+  }
+  try{
+    container.innerHTML = '<div class="small">Loading Work History…</div>';
+    const table = await fetchSheetTable(entry.sheetId, entry.sheetName||'Sheet1');
+    renderWorksTable(container, table);
+    const adminLink = document.createElement('div'); adminLink.className='small'; adminLink.style.marginTop='8px';
+    adminLink.innerHTML = `<a href="https://docs.google.com/spreadsheets/d/${entry.sheetId}/edit" target="_blank" rel="noopener">Open in Google Sheets (Admin)</a>`;
+    container.appendChild(adminLink);
+    return true; // gotovo – ne prikazuj Drive listing
+  }catch(e){
+    container.innerHTML = `<div class="small">Failed to load Work History: ${escapeHtml(e.message||String(e))}</div>`;
+    return true;
+  }
+}
+
+/* Category view */
 function drawCategory(b,m,catKey){
   const cat=CATS[catKey]; if(!cat){ go({bakery:b,machine:m}); return; }
   crumbsSet([{label:'Home',to:{}},{label:b,to:{bakery:b}},{label:m,to:{bakery:b,machine:m}},{label:cat.title,to:{bakery:b,machine:m,cat:catKey}}]);
@@ -330,10 +432,20 @@ function drawCategory(b,m,catKey){
   const card=document.createElement('div'); card.className='card';
   const h=document.createElement('h3'); h.textContent=`${b} › ${m} › ${cat.title}`; card.appendChild(h);
 
-  const fid=folderIdFor(b,m,catKey);
-  const hint=document.createElement('div'); hint.className='small';
-  hint.innerHTML=fid?`Folder ID: <code>${escapeHtml(fid)}</code>`:`⚠️ Set Drive folder ID in <code>FOLDERS</code>.`;
-  card.appendChild(hint);
+  const fid = folderIdFor(b,m,catKey);
+  const hint = document.createElement('div'); hint.className='small'; card.appendChild(hint);
+  function refreshHint(){
+    if(!fid){
+      hint.style.display = '';
+      hint.innerHTML = `⚠️ Set Drive folder ID in <code>FOLDERS</code>.`;
+    } else if (accessToken) {
+      hint.style.display = '';
+      hint.innerHTML = `Folder ID: <code>${escapeHtml(fid)}</code>`;
+    } else {
+      hint.style.display = 'none'; hint.innerHTML = '';
+    }
+  }
+  refreshHint();
 
   const bar=document.createElement('div'); bar.className='toolbar';
   const search=document.createElement('input'); search.type='search'; search.placeholder='Search files';
@@ -341,16 +453,21 @@ function drawCategory(b,m,catKey){
   const up=document.createElement('button'); up.className='btn'; up.textContent='Upload';
   const refresh=document.createElement('button'); refresh.className='btn ghost'; refresh.textContent='Refresh';
   const adminBtn=document.createElement('button'); adminBtn.className='btn ghost'; adminBtn.textContent='Admin: Sign in';
-
-  bar.append(adminBtn,search,file,up,refresh);
-  card.appendChild(bar);
-
+  bar.append(adminBtn,search,file,up,refresh); card.appendChild(bar);
   const list=document.createElement('div'); list.className='list'; card.appendChild(list);
   view.appendChild(card);
-
   file.style.display='none'; up.style.display='none';
 
-  /* PUBLIC list (no login) */
+  /* Ako je Work History i postoji Sheet, prikaži tablicu umjesto Drive listinga */
+  if(catKey === 'works'){
+    drawWorksSheetView(b, m, list).then(handled=>{
+      if(handled === true){
+        file.style.display='none'; up.style.display='none'; refresh.style.display='none';
+      }
+    }).catch(()=>{});
+  }
+
+  /* PUBLIC list */
   async function publicListFiles(){
     list.innerHTML='<div class="small">Loading…</div>';
     try{
@@ -420,7 +537,7 @@ function drawCategory(b,m,catKey){
     }catch(e){ list.innerHTML=`<div class='small'>Error: ${escapeHtml(e.message||String(e))}</div>`; }
   }
 
-  /* init category view */
+  // init
   publicListFiles();
   refresh.onclick = publicListFiles;
   search.oninput = publicListFiles;
@@ -428,15 +545,20 @@ function drawCategory(b,m,catKey){
   adminBtn.onclick = async () => {
     try{
       await ensureAuth();
+      refreshHint();
       file.style.display=''; up.style.display='';
       refresh.onclick = privateListFiles;
       search.oninput   = privateListFiles;
       adminBtn.style.display='none';
       await privateListFiles();
+      // (opcionalno) gumb za sign out:
+      const signOut = document.createElement('button'); signOut.className='btn ghost'; signOut.textContent='Admin: Sign out';
+      signOut.onclick = ()=>{ accessToken=null; alert('Signed out. Refresh to return to public mode.'); };
+      bar.append(signOut);
     }catch(e){ alert('Sign-in failed: ' + (e.message || String(e))); }
   };
 
-  /* Upload */
+  // upload
   up.onclick=async()=>{
     try{
       if(!fid){ alert('Set Drive folder ID in FOLDERS.'); return; }
@@ -538,9 +660,7 @@ async function drawSearch(query){
           ? await searchFolderPrivate(meta.folderId, query)
           : await searchFolderPublic(meta.folderId, query);
         files.forEach(f => { appendSearchItem(list, meta, f); resultsCount++; });
-      }catch(e){
-        // tihi fallback
-      }
+      }catch(e){ /* ignore per-folder errors */ }
     }
   }
 
@@ -552,7 +672,7 @@ async function drawSearch(query){
   }
 }
 
-/* Upload helper (multipart). Za >20MB prebaciti na resumable po potrebi */
+/* Upload helper */
 async function uploadToDrive(folderId, file){
   const boundary='-------314159265358979323846';
   const delimiter=`\r\n--${boundary}\r\n`;
@@ -584,7 +704,7 @@ function draw(){
 }
 window.addEventListener('load', draw);
 
-/* Hook global search form */
+/* Global search form */
 const gsForm = document.getElementById('globalSearchForm');
 const gsInput = document.getElementById('globalSearchInput');
 const clearBtn = document.getElementById('clearSearchBtn');
@@ -615,4 +735,5 @@ if(sessionStorage.getItem("unlocked") === "1"){ lock.style.display = "none"; }
 </script>
 </body>
 </html>
+
 
